@@ -1,8 +1,7 @@
 import os
 from contextlib import contextmanager
-from typing import IO, List, Tuple, Iterable, Iterator, TextIO
+from typing import List, Tuple, Iterator, TextIO
 
-import pytest
 from openpyxl import load_workbook, Workbook
 
 from jinja2xlsx.api import render
@@ -28,10 +27,9 @@ def test_xlsx_table_creation_from_html_table() -> None:
         html_table = f.read()
 
     wb = render(html_table)
-    assert get_wb_values(wb) == [("1", "2"), ("3", "4")]
+    assert get_wb_values(wb) == [(1, 2), (3, 4)]
 
 
-@pytest.mark.skip("WIP")
 def test_xlsx_table_creation_from_html_table_with_merged_cells() -> None:
     with read_from_test_dir("table_with_merged_cells.html") as f:
         html_table = f.read()
