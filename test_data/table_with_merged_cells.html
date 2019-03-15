@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table with merged cells</title>
+    <style>
+        table td {
+            border: 1px black solid;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+<table>
+    <tbody>
+    <tr>
+        <td>a</td>
+        <td>b</td>
+        <td>c</td>
+        <td>d</td>
+    </tr>
+
+    <tr>
+        <td rowspan="2" colspan="2">2</td>
+        <td>1</td>
+        <td rowspan="4">4</td>
+    </tr>
+    <tr>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td rowspan="2" colspan="2">2</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>1</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
