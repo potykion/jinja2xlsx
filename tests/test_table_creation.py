@@ -9,7 +9,4 @@ def test_xlsx_table_creation_from_html_table() -> None:
         html_table = f.read()
 
     wb = render(html_table)
-    assert list(wb.active.values) == [
-        ("1", "2"),
-        ("3", "4")
-    ]
+    assert list(wb.active.values) == [("1", "2"), ("3", "4")]

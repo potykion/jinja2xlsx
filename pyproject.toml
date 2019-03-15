@@ -13,7 +13,15 @@ jinja2 = "^2.10"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.3"
+mypy = "^0.670.0"
+black = {version = "^18.3-alpha.0",allows-prereleases = true}
+pre-commit = "^1.14"
 
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.black]
+line-length = 98
+py36 = true
+skip-string-normalization = true
