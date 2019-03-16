@@ -5,6 +5,7 @@ from typing import Union, Optional, Dict, Iterator
 from openpyxl import Workbook
 from openpyxl.cell import MergedCell, Cell
 from openpyxl.styles import Alignment, Border, Side, Font
+from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 from requests_html import HTML, Element
 
@@ -51,14 +52,13 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
             style = extract_style(html_cell.attrs.get("style"))
 
             if colspan > 1 or rowspan > 1:
-                cell_range = dict(
+                cell_range = str_cell_range(
                     start_row=row_index + 1,
                     start_column=col_index + 1,
                     end_row=row_index + rowspan,
                     end_column=col_index + colspan,
                 )
-                sheet.merge_cells(**cell_range)
-                # style_multiple_cells(cell_range, style)
+                style_and_merge_cell_range(sheet, cell_range, style)
             else:
                 style_single_cell(target_cell, style)
 
@@ -88,7 +88,7 @@ def parse_cell_value(cell_text: str) -> Union[int, float, str]:
             return cell_text
 
 
-def extract_style(style_attr: str) -> Optional[Style]:
+def extract_style(style_attr: str) -> Style:
     """
     >>> style = extract_style("border: 1px solid black; text-align: center; font-weight: bold")
     >>> style.alignment.horizontal
@@ -101,7 +101,7 @@ def extract_style(style_attr: str) -> Optional[Style]:
     True
     """
     if not style_attr:
-        return None
+        return Style()
 
     style_dict = {
         style.strip(): value.strip()
@@ -174,9 +174,43 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
     return next(borders, None)
 
 
-def style_single_cell(cell: Cell, style: Optional[Style]) -> None:
-    if not style:
-        return
-
+def style_single_cell(cell: Cell, style: Style) -> None:
     for style_key, value in asdict(style).items():
         setattr(cell, style_key, value)
+
+
+def str_cell_range(start_column: int, start_row: int, end_column: int, end_row: int) -> str:
+    from_column = get_column_letter(start_column)
+    to_column = get_column_letter(end_column)
+    return f"{from_column}{start_row}:{to_column}{end_row}"
+
+
+def style_and_merge_cell_range(sheet: Worksheet, cell_range: str, style: Style) -> None:
+    """
+    Source:
+    https://openpyxl.readthedocs.io/en/2.5/styles.html#styling-merged-cells
+    """
+    top = Border(top=style.border.top)
+    left = Border(left=style.border.left)
+    right = Border(right=style.border.right)
+    bottom = Border(bottom=style.border.bottom)
+
+    first_cell = sheet[cell_range.split(":")[0]]
+    if style.alignment:
+        sheet.merge_cells(cell_range)
+        first_cell.alignment = style.alignment
+
+    if style.font:
+        first_cell.font = style.font
+
+    rows = sheet[cell_range]
+    for cell in rows[0]:
+        cell.border = cell.border + top
+    for cell in rows[-1]:
+        cell.border = cell.border + bottom
+
+    for row in rows:
+        l = row[0]
+        r = row[-1]
+        l.border = l.border + left
+        r.border = r.border + right

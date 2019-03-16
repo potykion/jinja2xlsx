@@ -19,7 +19,7 @@ def test_xlsx_table_creation_from_html_table_with_merged_cells() -> None:
         actual_wb = render(html_table)
         actual_wb_values = get_wb_values(actual_wb)
 
-    expected_wb = load_workbook(get_test_file_path("table_with_merged_cells.html.xlsx"))
+    expected_wb = load_workbook(get_test_file_path("table_with_merged_cells.xlsx"))
     expected_wb_values = get_wb_values(expected_wb)
 
     assert actual_wb_values == expected_wb_values
@@ -48,3 +48,14 @@ def test_xlsx_table_created_from_html_table_has_side_border() -> None:
         styled_cell = actual_wb.active.cell(1, 1)
 
     assert styled_cell.border == Border(bottom=Side("medium"))
+
+
+def test_xlsx_table_created_from_html_table_with_merged_cell_and_side_border() -> None:
+    with read_from_test_dir("table_with_merged_cells_styled.html") as f:
+        html_table = f.read()
+        actual_wb = render(html_table)
+
+    assert actual_wb.active.cell(row=1, column=1).border != Border(bottom=Side("medium"))
+    assert actual_wb.active.cell(row=1, column=2).border != Border(bottom=Side("medium"))
+    assert actual_wb.active.cell(row=2, column=1).border == Border(bottom=Side("medium"))
+    assert actual_wb.active.cell(row=2, column=2).border == Border(bottom=Side("medium"))
