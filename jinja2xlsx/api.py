@@ -1,6 +1,6 @@
 import re
 from dataclasses import asdict
-from typing import Union, Optional, Dict, Iterator
+from typing import Optional, Dict, Iterator, Any
 
 from openpyxl import Workbook
 from openpyxl.cell import MergedCell, Cell
@@ -68,10 +68,10 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
         col_index = 0
 
 
-def parse_cell_value(cell_text: str) -> Union[int, float, str]:
+def parse_cell_value(cell_text: str) -> Any:
     """
-    >>> parse_cell_value("")
-    ''
+    >>> parse_cell_value("") is None
+    True
     >>> parse_cell_value("ass")
     'ass'
     >>> parse_cell_value("1")
@@ -85,6 +85,9 @@ def parse_cell_value(cell_text: str) -> Union[int, float, str]:
         try:
             return float(cell_text)
         except ValueError:
+            if cell_text == "":
+                return None
+
             return cell_text
 
 

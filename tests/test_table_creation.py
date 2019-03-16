@@ -1,3 +1,6 @@
+import os
+
+import pytest
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
@@ -59,3 +62,20 @@ def test_xlsx_table_created_from_html_table_with_merged_cell_and_side_border() -
     assert actual_wb.active.cell(row=1, column=2).border != Border(bottom=Side("medium"))
     assert actual_wb.active.cell(row=2, column=1).border == Border(bottom=Side("medium"))
     assert actual_wb.active.cell(row=2, column=2).border == Border(bottom=Side("medium"))
+
+
+@pytest.mark.skipif(
+    not os.path.exists(get_test_file_path("report.html")),
+    reason="No report.html/xlsx present in test_data/",
+)
+def test_xlsx_report_creation() -> None:
+    with read_from_test_dir("report.html") as f:
+        html = f.read()
+        wb = render(html)
+        wb.save("actual_report.xlsx")
+        actual_values = get_wb_values(wb)
+
+    expected_wb = load_workbook(get_test_file_path("report.xlsx"))
+    expected_values = get_wb_values(expected_wb)
+
+    assert actual_values == expected_values

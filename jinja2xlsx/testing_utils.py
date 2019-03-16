@@ -13,7 +13,7 @@ def get_test_file_path(file_: str) -> str:
 
 @contextmanager
 def read_from_test_dir(file_: str) -> Iterator[TextIO]:
-    with open(get_test_file_path(file_)) as f:
+    with open(get_test_file_path(file_), encoding="utf-8") as f:
         yield f
 
 
