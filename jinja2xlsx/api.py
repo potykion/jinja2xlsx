@@ -1,9 +1,13 @@
-from typing import Union
+from dataclasses import asdict
+from typing import Union, Optional
 
 from openpyxl import Workbook
-from openpyxl.cell import MergedCell
+from openpyxl.cell import MergedCell, Cell
+from openpyxl.styles import Alignment, Border, Side, Font
 from openpyxl.worksheet.worksheet import Worksheet
 from requests_html import HTML, Element
+
+from jinja2xlsx.models import Style
 
 
 def render(html_str: str) -> Workbook:
@@ -30,7 +34,7 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
     col_index = 0
 
     for row in table.find("tr"):
-        for cell in row.find("td"):
+        for html_cell in row.find("td"):
             target_cell = sheet.cell(row_index + 1, col_index + 1)
             while True:
                 if isinstance(target_cell, MergedCell):
@@ -39,18 +43,23 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
                 else:
                     break
 
-            target_cell.value = parse_cell_value(cell.text)
+            target_cell.value = parse_cell_value(html_cell.text)
 
-            colspan = int(cell.attrs.get("colspan", 1))
-            rowspan = int(cell.attrs.get("rowspan", 1))
+            colspan = int(html_cell.attrs.get("colspan", 1))
+            rowspan = int(html_cell.attrs.get("rowspan", 1))
+            style = extract_style(html_cell.attrs.get("style"))
 
             if colspan > 1 or rowspan > 1:
-                sheet.merge_cells(
+                cell_range = dict(
                     start_row=row_index + 1,
                     start_column=col_index + 1,
                     end_row=row_index + rowspan,
                     end_column=col_index + colspan,
                 )
+                sheet.merge_cells(**cell_range)
+                # style_multiple_cells(cell_range, style)
+            else:
+                style_single_cell(target_cell, style)
 
             col_index += colspan
 
@@ -76,3 +85,55 @@ def parse_cell_value(cell_text: str) -> Union[int, float, str]:
             return float(cell_text)
         except ValueError:
             return cell_text
+
+
+def extract_style(style_attr: str) -> Optional[Style]:
+    """
+    >>> style = extract_style("border: 1px solid black; text-align: center; font-weight: bold")
+    >>> style.alignment.horizontal
+    'center'
+    >>> style.border.left.style
+    'thin'
+    >>> style.border.left.style == style.border.right.style == style.border.top.style == style.border.bottom.style
+    True
+    >>> style.font.bold
+    True
+    """
+    if not style_attr:
+        return None
+
+    style_dict = {
+        style.strip(): value.strip()
+        for style, value in (style.split(":") for style in style_attr.split(";"))
+    }
+
+    border_rule = style_dict.get("border")
+    if border_rule == "1px solid black":
+        border = Border(
+            left=Side(style="thin"),
+            right=Side(style="thin"),
+            top=Side(style="thin"),
+            bottom=Side(style="thin"),
+        )
+    else:
+        border = Border()
+
+    text_align_rule = style_dict.get("text-align")
+    if text_align_rule:
+        alignment = Alignment(horizontal=text_align_rule)
+    else:
+        alignment = Alignment()
+
+    font = Font()
+    if style_dict.get("font-weight") == "bold":
+        font.bold = True
+
+    return Style(border, alignment, font)
+
+
+def style_single_cell(cell: Cell, style: Optional[Style]) -> None:
+    if not style:
+        return
+
+    for style_key, value in asdict(style).items():
+        setattr(cell, style_key, value)
