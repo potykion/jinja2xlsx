@@ -1,5 +1,6 @@
+import re
 from dataclasses import asdict
-from typing import Union, Optional
+from typing import Union, Optional, Dict, Iterator
 
 from openpyxl import Workbook
 from openpyxl.cell import MergedCell, Cell
@@ -104,19 +105,10 @@ def extract_style(style_attr: str) -> Optional[Style]:
 
     style_dict = {
         style.strip(): value.strip()
-        for style, value in (style.split(":") for style in style_attr.split(";"))
+        for style, value in (style.split(":") for style in filter(None, style_attr.split(";")))
     }
 
-    border_rule = style_dict.get("border")
-    if border_rule == "1px solid black":
-        border = Border(
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin"),
-        )
-    else:
-        border = Border()
+    border = _build_border(style_dict) or Border()
 
     text_align_rule = style_dict.get("text-align")
     if text_align_rule:
@@ -129,6 +121,57 @@ def extract_style(style_attr: str) -> Optional[Style]:
         font.bold = True
 
     return Style(border, alignment, font)
+
+
+def _build_border(style_dict: Dict[str, str]) -> Border:
+    """
+    >>> border = _build_border({"border": "1px solid black"})
+    >>> border.left.style
+    'thin'
+    >>> border.left.style == border.right.style == border.top.style == border.bottom.style
+    True
+    >>> border = _build_border({"border-right": "2px solid black"})
+    >>> border.right.style
+    'medium'
+    """
+
+    def _from_border_attr(border_attr: str) -> Optional[Border]:
+        border_rule = style_dict.get(border_attr)
+        if not border_rule:
+            return None
+
+        if border_rule == "1px solid black":
+            side = Side(style="thin")
+        elif re.match(r"\d+px solid black", border_rule):
+            side = Side(style="medium")
+        else:
+            side = Side()
+
+        if border_attr == "border":
+            return Border(left=side, right=side, top=side, bottom=side)
+        if border_attr == "border-left":
+            return Border(left=side)
+        if border_attr == "border-right":
+            return Border(right=side)
+        if border_attr == "border-top":
+            return Border(top=side)
+        if border_attr == "border-bottom":
+            return Border(bottom=side)
+
+        return None
+
+    borders: Iterator[Border] = filter(
+        None,
+        (
+            _from_border_attr("border"),
+            _from_border_attr("border-left"),
+            _from_border_attr("border-right"),
+            _from_border_attr("border-top"),
+            _from_border_attr("border-bottom"),
+        ),
+    )
+
+    return next(borders, None)
 
 
 def style_single_cell(cell: Cell, style: Optional[Style]) -> None:

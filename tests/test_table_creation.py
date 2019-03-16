@@ -39,3 +39,12 @@ def test_xlsx_table_created_from_html_table_has_styles() -> None:
         bottom=Side(style="thin"),
     )
     assert styled_cell.font == Font(bold=True)
+
+
+def test_xlsx_table_created_from_html_table_has_side_border() -> None:
+    with read_from_test_dir("table_with_side_borders.html") as f:
+        html_table = f.read()
+        actual_wb = render(html_table)
+        styled_cell = actual_wb.active.cell(1, 1)
+
+    assert styled_cell.border == Border(bottom=Side("medium"))
