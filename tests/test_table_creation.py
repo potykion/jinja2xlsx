@@ -65,23 +65,6 @@ def test_xlsx_table_created_from_html_table_with_merged_cell_and_side_border() -
     assert actual_wb.active.cell(row=2, column=2).border == Border(bottom=Side("medium"))
 
 
-@pytest.mark.skipif(
-    not os.path.exists(get_test_file_path("report.html")),
-    reason="No report.html/xlsx present in test_data/",
-)
-def test_xlsx_report_creation() -> None:
-    with read_from_test_dir("report.html") as f:
-        html = f.read()
-        wb = render(html)
-        wb.save("actual_report.xlsx")
-        actual_values = get_wb_values(wb)
-
-    expected_wb = load_workbook(get_test_file_path("report.xlsx"))
-    expected_values = get_wb_values(expected_wb)
-
-    assert actual_values == expected_values
-
-
 def test_xlsx_table_created_from_table_has_column_width() -> None:
     with read_from_test_dir("table_with_colgroup.html") as f:
         html = f.read()
@@ -97,7 +80,7 @@ def test_xlsx_table_created_from_html_has_row_height() -> None:
     with read_from_test_dir("table_with_row_height.html") as f:
         html = f.read()
         wb = render(html)
-        wb.save("actual_table_with_row_height.xlsx")
+        # wb.save("actual_table_with_row_height.xlsx")
 
     assert wb.active.row_dimensions[1].height == height_pixels_to_xlsx_units(100)
     assert wb.active.row_dimensions[2].height == height_pixels_to_xlsx_units(200)
@@ -111,3 +94,24 @@ def test_xlsx_table_creation_with_default_style() -> None:
         wb = render(html_table, default_style=default_style)
 
     assert wb.active.cell(1, 1).font == default_style.font
+
+
+@pytest.mark.skipif(
+    not os.path.exists(get_test_file_path("report.html")),
+    reason="No report.html/xlsx present in test_data/",
+)
+def test_xlsx_report_creation() -> None:
+    default_style = Style(
+        alignment=Alignment(vertical="center", wrap_text=True),
+        font=Font(name="Times New Roman", sz=10),
+    )
+
+    with read_from_test_dir("report.html") as f:
+        html = f.read()
+        wb = render(html, default_style)
+        wb.save("actual_report.xlsx")
+        actual_values = get_wb_values(wb)
+
+    expected_wb = load_workbook(get_test_file_path("report.xlsx"))
+    expected_values = get_wb_values(expected_wb)
+    assert actual_values == expected_values
