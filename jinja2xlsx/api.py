@@ -6,6 +6,7 @@ from openpyxl import Workbook
 from openpyxl.cell import MergedCell, Cell
 from openpyxl.styles import Alignment, Border, Side, Font
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.dimensions import ColumnDimension
 from openpyxl.worksheet.worksheet import Worksheet
 from requests_html import HTML, Element
 
@@ -17,18 +18,32 @@ def render(html_str: str) -> Workbook:
 
     table = html.find("table", first=True)
 
-    # colgroup = table.find("colgroup", first=True)
-    # assert colgroup, "No colgroup with col defined"
-    # columns = colgroup.find("col")
-    # assert columns, "No colgroup with col defined"
-
     wb = Workbook()
     ws: Worksheet = wb.active
+
+    colgroup = table.find("colgroup", first=True)
+    if colgroup:
+        adjust_columns(ws, table)
 
     table_body = table.find("tbody", first=True)
     fill_sheet_with_table_data(ws, table_body)
 
     return wb
+
+
+def adjust_columns(sheet: Worksheet, colgroup: Element) -> None:
+    columns = colgroup.find("col")
+    for index, column in enumerate(columns):
+        col_width_in_pixels = int(column.attrs.get("width", 0))
+        if not col_width_in_pixels:
+            continue
+
+        column_dimension: ColumnDimension = sheet.column_dimensions[get_column_letter(index + 1)]
+        column_dimension.width = pixels_to_xlsx_units(col_width_in_pixels)
+
+
+def pixels_to_xlsx_units(pixels: float) -> float:
+    return pixels / 7.5
 
 
 def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:

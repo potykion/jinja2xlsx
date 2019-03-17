@@ -4,7 +4,7 @@ import pytest
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
-from jinja2xlsx.api import render
+from jinja2xlsx.api import render, pixels_to_xlsx_units
 from jinja2xlsx.testing_utils import read_from_test_dir, get_wb_values, get_test_file_path
 
 
@@ -79,3 +79,14 @@ def test_xlsx_report_creation() -> None:
     expected_values = get_wb_values(expected_wb)
 
     assert actual_values == expected_values
+
+
+def test_xlsx_table_created_from_table_has_column_width() -> None:
+    with read_from_test_dir("table_with_colgroup.html") as f:
+        html = f.read()
+        wb = render(html)
+        # wb.save("actual_table_with_colgroup.xlsx")
+
+    assert wb.active.column_dimensions["A"].width == pixels_to_xlsx_units(100)
+    assert wb.active.column_dimensions["B"].width == 0
+    assert wb.active.column_dimensions["C"].width == pixels_to_xlsx_units(200)
