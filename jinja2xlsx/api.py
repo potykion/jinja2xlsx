@@ -39,11 +39,15 @@ def adjust_columns(sheet: Worksheet, colgroup: Element) -> None:
             continue
 
         column_dimension: ColumnDimension = sheet.column_dimensions[get_column_letter(index + 1)]
-        column_dimension.width = pixels_to_xlsx_units(col_width_in_pixels)
+        column_dimension.width = width_pixels_to_xlsx_units(col_width_in_pixels)
 
 
-def pixels_to_xlsx_units(pixels: float) -> float:
+def width_pixels_to_xlsx_units(pixels: float) -> float:
     return pixels / 7.5
+
+
+def height_pixels_to_xlsx_units(pixels: float) -> float:
+    return pixels * 3 / 4
 
 
 def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
@@ -51,6 +55,8 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
     col_index = 0
 
     for row in table.find("tr"):
+        try_adjust_row(sheet, row_index, row)
+
         for html_cell in row.find("td"):
             target_cell = sheet.cell(row_index + 1, col_index + 1)
             while True:
@@ -81,6 +87,27 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
 
         row_index += 1
         col_index = 0
+
+
+def try_adjust_row(sheet: Worksheet, row_index: int, row: Element) -> None:
+    style_dict = style_to_dict(row.attrs.get("style"))
+    height_str = style_dict.get("line-height") or style_dict.get("height") or ""
+    row_height = try_extract_pixels(height_str)
+    if row_height:
+        sheet.row_dimensions[row_index + 1].height = height_pixels_to_xlsx_units(row_height)
+
+
+def try_extract_pixels(pixel_str: Optional[str]) -> Optional[float]:
+    """
+    >>> try_extract_pixels("100px")
+    100.0
+    >>> try_extract_pixels("") is None
+    True
+    """
+    if not pixel_str:
+        return None
+
+    return float(re.findall("(\d+)px", pixel_str)[0])
 
 
 def parse_cell_value(cell_text: str) -> Any:
@@ -121,10 +148,7 @@ def extract_style(style_attr: str) -> Style:
     if not style_attr:
         return Style()
 
-    style_dict = {
-        style.strip(): value.strip()
-        for style, value in (style.split(":") for style in filter(None, style_attr.split(";")))
-    }
+    style_dict = style_to_dict(style_attr)
 
     border = _build_border(style_dict) or Border()
 
@@ -139,6 +163,24 @@ def extract_style(style_attr: str) -> Style:
         font.bold = True
 
     return Style(border, alignment, font)
+
+
+def style_to_dict(style_str: str) -> Dict:
+    """
+    >>> style_to_dict("border: 1px solid black; text-align: center; font-weight: bold")
+    {'border': '1px solid black', 'text-align': 'center', 'font-weight': 'bold'}
+    >>> style_to_dict("")
+    {}
+    >>> style_to_dict(None)
+    {}
+    """
+    if not style_str:
+        return {}
+
+    return {
+        style.strip(): value.strip()
+        for style, value in (style.split(":") for style in filter(None, style_str.split(";")))
+    }
 
 
 def _build_border(style_dict: Dict[str, str]) -> Border:
