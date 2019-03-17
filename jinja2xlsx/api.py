@@ -13,7 +13,9 @@ from requests_html import HTML, Element
 from jinja2xlsx.models import Style
 
 
-def render(html_str: str) -> Workbook:
+def render(html_str: str, default_style: Optional[Style] = None) -> Workbook:
+    default_style = default_style or Style()
+
     html = HTML(html=html_str)
 
     table = html.find("table", first=True)
@@ -26,7 +28,7 @@ def render(html_str: str) -> Workbook:
         adjust_columns(ws, table)
 
     table_body = table.find("tbody", first=True)
-    fill_sheet_with_table_data(ws, table_body)
+    fill_sheet_with_table_data(ws, table_body, default_style)
 
     return wb
 
@@ -50,7 +52,7 @@ def height_pixels_to_xlsx_units(pixels: float) -> float:
     return pixels * 3 / 4
 
 
-def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
+def fill_sheet_with_table_data(sheet: Worksheet, table: Element, default_style: Style) -> None:
     row_index = 0
     col_index = 0
 
@@ -71,6 +73,7 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element) -> None:
             colspan = int(html_cell.attrs.get("colspan", 1))
             rowspan = int(html_cell.attrs.get("rowspan", 1))
             style = extract_style(html_cell.attrs.get("style"))
+            style = default_style.union(style)
 
             if colspan > 1 or rowspan > 1:
                 cell_range = str_cell_range(

@@ -5,6 +5,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
 from jinja2xlsx.api import render, width_pixels_to_xlsx_units, height_pixels_to_xlsx_units
+from jinja2xlsx.models import Style
 from jinja2xlsx.testing_utils import read_from_test_dir, get_wb_values, get_test_file_path
 
 
@@ -100,3 +101,13 @@ def test_xlsx_table_created_from_html_has_row_height() -> None:
 
     assert wb.active.row_dimensions[1].height == height_pixels_to_xlsx_units(100)
     assert wb.active.row_dimensions[2].height == height_pixels_to_xlsx_units(200)
+
+
+def test_xlsx_table_creation_with_default_style() -> None:
+    default_style = Style(font=Font("Times New Roman", 15))
+
+    with read_from_test_dir("table.html") as f:
+        html_table = f.read()
+        wb = render(html_table, default_style=default_style)
+
+    assert wb.active.cell(1, 1).font == default_style.font
