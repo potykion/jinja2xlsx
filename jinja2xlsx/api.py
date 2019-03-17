@@ -72,6 +72,7 @@ def fill_sheet_with_table_data(sheet: Worksheet, table: Element, default_style: 
 
             colspan = int(html_cell.attrs.get("colspan", 1))
             rowspan = int(html_cell.attrs.get("rowspan", 1))
+
             style = extract_style(html_cell.attrs.get("style"))
             style = default_style.union(style)
 
@@ -153,22 +154,14 @@ def extract_style(style_attr: str) -> Style:
 
     style_dict = style_to_dict(style_attr)
 
-    border = _build_border(style_dict) or Border()
-
-    text_align_rule = style_dict.get("text-align")
-    if text_align_rule:
-        alignment = Alignment(horizontal=text_align_rule)
-    else:
-        alignment = Alignment()
-
-    font = Font()
-    if style_dict.get("font-weight") == "bold":
-        font.bold = True
+    border = _build_border(style_dict)
+    alignment = _build_alignment(style_dict)
+    font = _build_font(style_dict)
 
     return Style(border, alignment, font)
 
 
-def style_to_dict(style_str: str) -> Dict:
+def style_to_dict(style_str: Optional[str]) -> Dict:
     """
     >>> style_to_dict("border: 1px solid black; text-align: center; font-weight: bold")
     {'border': '1px solid black', 'text-align': 'center', 'font-weight': 'bold'}
@@ -234,7 +227,27 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
         ),
     )
 
-    return next(borders, None)
+    return next(borders, Border())
+
+
+def _build_alignment(style_dict: Dict) -> Alignment:
+    word_wrap = style_dict.get("word-wrap")
+
+    wrap_text: Optional[bool]
+    if word_wrap == "break-word":
+        wrap_text = True
+    elif word_wrap == "normal":
+        wrap_text = False
+    else:
+        wrap_text = None
+
+    alignment = Alignment(horizontal=style_dict.get("text-align"), wrap_text=wrap_text)
+    return alignment
+
+
+def _build_font(style_dict: Dict) -> Font:
+    font = Font(bold=style_dict.get("font-weight") == "bold")
+    return font
 
 
 def style_single_cell(cell: Cell, style: Style) -> None:

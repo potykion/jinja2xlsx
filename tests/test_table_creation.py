@@ -96,6 +96,15 @@ def test_xlsx_table_creation_with_default_style() -> None:
     assert wb.active.cell(1, 1).font == default_style.font
 
 
+def test_xlsx_table_creation_with_wrapping() -> None:
+    with read_from_test_dir("table_with_wrap.html") as f:
+        html_table = f.read()
+        wb = render(html_table)
+
+    assert not wb.active.cell(row=1, column=1).alignment.wrap_text
+    assert wb.active.cell(row=1, column=2).alignment.wrap_text
+
+
 @pytest.mark.skipif(
     not os.path.exists(get_test_file_path("report.html")),
     reason="No report.html/xlsx present in test_data/",
