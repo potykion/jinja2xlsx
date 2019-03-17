@@ -4,8 +4,9 @@ import pytest
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
-from jinja2xlsx.api import render, width_pixels_to_xlsx_units, height_pixels_to_xlsx_units
-from jinja2xlsx.models import Style
+from jinja2xlsx.api import render
+from jinja2xlsx.utils import width_pixels_to_xlsx_units, height_pixels_to_xlsx_units
+from jinja2xlsx.style import Style
 from jinja2xlsx.testing_utils import read_from_test_dir, get_wb_values, get_test_file_path
 
 
