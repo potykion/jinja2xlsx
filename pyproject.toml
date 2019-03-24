@@ -10,6 +10,8 @@ version = "0.1.0"
 description = "Convert jinja2-html to xlsx"
 authors = ["potykion <potykion@gmail.com>"]
 license = "mit"
+readme = "README.md"
+repository  = "https://github.com/potykion/jinja2xlsx"
 
 [tool.poetry.dependencies]
 python = "^3.7"

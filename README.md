@@ -39,3 +39,9 @@ html_str = """<!DOCTYPE html>
 workbook: Workbook = render(html_str)
 assert tuple(workbook.active.values) == ((1, 2), (3, 4))
 ```
+
+## Publish to PyPI
+
+```shell
+poetry publish --build
+```
