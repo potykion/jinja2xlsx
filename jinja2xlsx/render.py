@@ -52,12 +52,14 @@ class Renderer:
         self, col_index: int, row_index: int, sheet: Worksheet
     ) -> Tuple[Cell, int]:
         target_cell = sheet.cell(row_index + 1, col_index + 1)
+
         while True:
             if isinstance(target_cell, MergedCell):
                 col_index += 1
                 target_cell = sheet.cell(row_index + 1, col_index + 1)
             else:
                 break
+
         return target_cell, col_index
 
     def _fill_cells(self, cells: CellGenerator) -> None:
