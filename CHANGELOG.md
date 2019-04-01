@@ -1,7 +1,7 @@
 # Changelog
 
 
-## Unreleased 
+## 0.2.1 - 01.04.2019 
 
 ### Fixed 
 
