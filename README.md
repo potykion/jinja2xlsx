@@ -11,7 +11,7 @@ When render html to xlsx
 Then result xlsx has table values
 
 ```python
-from jinja2xlsx.api import render
+from jinja2xlsx import render_xlsx
 from openpyxl import Workbook
 
 html_str = """<!DOCTYPE html>
@@ -36,7 +36,7 @@ html_str = """<!DOCTYPE html>
     </body>
 </html>"""
 
-workbook: Workbook = render(html_str)
+workbook: Workbook = render_xlsx(html_str)
 assert tuple(workbook.active.values) == ((1, 2), (3, 4))
 ```
 
