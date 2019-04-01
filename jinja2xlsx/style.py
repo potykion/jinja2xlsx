@@ -133,6 +133,9 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
     >>> border = _build_border({"border": "1px solid black", "border-bottom": "0"})
     >>> border == Border(left=Side("thin"), right=Side("thin"), top=Side("thin"))
     True
+    >>> border = _build_border({"border": "1px solid black", "border-top": "none"})
+    >>> border == Border(left=Side("thin"), right=Side("thin"), bottom=Side("thin"))
+    True
     """
 
     def _from_border_attr(border_attr: str) -> Optional[Border]:
@@ -144,7 +147,7 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
             side = Side(style="thin")
         elif re.match(r"\d+px solid black", border_rule):
             side = Side(style="medium")
-        elif border_rule.startswith("0"):
+        elif border_rule.startswith("0") or border_rule.startswith("none"):
             side = REMOVE_SIDE
         else:
             side = Side()

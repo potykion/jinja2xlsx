@@ -1,5 +1,12 @@
 # Changelog
 
+
+## Unreleased 
+
+### Fixed 
+
+- None border as 0px border
+
 ## 0.2.0 - 01.04.2019
 
 ### Added 
