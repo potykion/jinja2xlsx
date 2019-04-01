@@ -106,6 +106,16 @@ def test_xlsx_table_creation_with_wrapping() -> None:
     assert wb.active.cell(row=1, column=2).alignment.wrap_text
 
 
+def test_xlsx_creation_from_table_with_multiple_borders() -> None:
+    with read_from_test_dir("table_with_multiple_borders.html") as f:
+        html_table = f.read()
+        wb = render(html_table)
+
+    assert wb.active.cell(1, 1).border == Border(
+        left=Side("thin"), right=Side("thin"), top=Side("thin")
+    )
+
+
 @pytest.mark.skipif(
     not os.path.exists(get_test_file_path("report.html")),
     reason="No report.html/xlsx present in test_data/",

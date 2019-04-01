@@ -8,6 +8,8 @@ from requests_html import Element
 
 from jinja2xlsx.utils import union_dicts, CellRange
 
+REMOVE_SIDE = Side()
+
 
 @dataclass()
 class Style:
@@ -128,6 +130,9 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
     >>> border = _build_border({"border-right": "2px solid black"})
     >>> border.right.style
     'medium'
+    >>> border = _build_border({"border": "1px solid black", "border-bottom": "0"})
+    >>> border == Border(left=Side("thin"), right=Side("thin"), top=Side("thin"))
+    True
     """
 
     def _from_border_attr(border_attr: str) -> Optional[Border]:
@@ -139,6 +144,8 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
             side = Side(style="thin")
         elif re.match(r"\d+px solid black", border_rule):
             side = Side(style="medium")
+        elif border_rule.startswith("0"):
+            side = REMOVE_SIDE
         else:
             side = Side()
 
@@ -166,7 +173,19 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
         ),
     )
 
-    return next(borders, Border())
+    final_border = Border()
+
+    sides = ("left", "right", "top", "bottom")
+
+    for border in borders:
+        for side_name in sides:
+            side = getattr(border, side_name)
+            if side == Side() and side is not REMOVE_SIDE:
+                continue
+
+            setattr(final_border, side_name, side)
+
+    return final_border
 
 
 def _build_alignment(style_dict: Dict) -> Alignment:
