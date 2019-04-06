@@ -6,7 +6,7 @@ skip-string-normalization = true
 
 [tool.poetry]
 name = "jinja2xlsx"
-version = "0.2.1"
+version = "0.2.2"
 description = "Convert jinja2-html to xlsx"
 authors = ["potykion <potykion@gmail.com>"]
 license = "mit"
