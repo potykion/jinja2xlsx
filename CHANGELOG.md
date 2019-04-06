@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.3 - 06.04.2019
+
+### Fixed
+
+- jinja2xlsx.utils.parse_cell_value: Check is float via isdigit with replace due to python crush on float(str)
+
+### Removed 
+
+- jinja2xlsx.render.Renderer: Remove lazy cell generation since there is no memory leak
+
 ## 0.2.2 - 06.04.2019
 
 ### Fixed

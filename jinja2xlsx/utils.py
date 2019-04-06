@@ -50,13 +50,14 @@ def parse_cell_value(cell_text: str) -> Any:
     if cell_text == "":
         return None
 
-    try:
+    if cell_text.isdigit():
         return int(cell_text)
-    except ValueError:
-        try:
-            return float(cell_text)
-        except ValueError:
-            return cell_text
+
+    # float(str) break python for very long non-float string ~_~
+    if cell_text.replace(".", "", 1).isdigit():
+        return float(cell_text)
+
+    return cell_text
 
 
 def create_cell_range_str(col_index: int, colspan: int, row_index: int, rowspan: int) -> str:
