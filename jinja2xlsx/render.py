@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from itertools import tee
 from typing import Tuple
 
 from openpyxl import Workbook
@@ -19,9 +20,9 @@ class Renderer:
     def __call__(self) -> Workbook:
         wb = Workbook()
 
-        cells = list(self._generate_cells(wb.active))
-        self._fill_cells(cells)
-        self._style_cells(cells)
+        cells_to_fill, cells_to_style = tee(self._generate_cells(wb.active))
+        self._fill_cells(cells_to_fill)
+        self._style_cells(cells_to_style)
 
         adjuster = Adjuster(wb.active)
         adjuster.adjust_columns(self.parser.columns)
