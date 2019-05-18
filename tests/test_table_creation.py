@@ -114,24 +114,3 @@ def test_xlsx_creation_from_table_with_multiple_borders() -> None:
     assert wb.active.cell(1, 1).border == Border(
         left=Side("thin"), right=Side("thin"), top=Side("thin")
     )
-
-
-@pytest.mark.skipif(
-    not os.path.exists(get_test_file_path("report.html")),
-    reason="No report.html/xlsx present in test_data/",
-)
-def test_xlsx_report_creation() -> None:
-    default_style = Style(
-        alignment=Alignment(vertical="center", wrap_text=True),
-        font=Font(name="Times New Roman", sz=10),
-    )
-
-    with read_from_test_dir("report.html") as f:
-        html = f.read()
-        wb = render(html, default_style)
-        wb.save("actual_report.xlsx")
-        actual_values = get_wb_values(wb)
-
-    expected_wb = load_workbook(get_test_file_path("report.xlsx"))
-    expected_values = get_wb_values(expected_wb)
-    assert actual_values == expected_values
