@@ -1,13 +1,10 @@
-import os
-
-import pytest
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
 from jinja2xlsx.api import render
-from jinja2xlsx.utils import width_pixels_to_xlsx_units, height_pixels_to_xlsx_units
 from jinja2xlsx.style import Style
 from jinja2xlsx.testing_utils import read_from_test_dir, get_wb_values, get_test_file_path
+from jinja2xlsx.utils import width_pixels_to_xlsx_units, height_pixels_to_xlsx_units
 
 
 def test_xlsx_table_creation_from_html_table() -> None:
@@ -114,3 +111,11 @@ def test_xlsx_creation_from_table_with_multiple_borders() -> None:
     assert wb.active.cell(1, 1).border == Border(
         left=Side("thin"), right=Side("thin"), top=Side("thin")
     )
+
+
+def test_xlsx_creation_from_table_with_image() -> None:
+    with read_from_test_dir("table_with_image.html") as f:
+        html_table = f.read()
+        wb = render(html_table)
+
+    assert len(wb.active._images) == 1
