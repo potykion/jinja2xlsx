@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, Optional
+from typing import Tuple
 
 from openpyxl import Workbook
 from openpyxl.cell import MergedCell, Cell

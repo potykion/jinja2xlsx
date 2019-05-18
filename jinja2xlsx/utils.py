@@ -32,7 +32,7 @@ def try_extract_pixels(pixel_str: Optional[str]) -> Optional[float]:
     if not pixel_str:
         return None
 
-    return float(re.findall("(\d+)px", pixel_str)[0])
+    return float(re.findall(r"(\d+)px", pixel_str)[0])
 
 
 def parse_cell_value(cell_text: str) -> Any:

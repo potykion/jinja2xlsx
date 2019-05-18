@@ -96,10 +96,10 @@ class Stylist:
             cell.border = cell.border + bottom
 
         for row in cell_range:
-            l = row[0]
-            r = row[-1]
-            l.border = l.border + left
-            r.border = r.border + right
+            left_cell = row[0]
+            right_cell = row[-1]
+            left_cell.border = left_cell.border + left
+            right_cell.border = right_cell.border + right
 
 
 def parse_style_attr(style_str: Optional[str]) -> Dict:
