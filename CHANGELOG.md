@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 - 18.05.2019
+
+- jinja2xlsx.render.Renderer: parse img tag to image and add it to xlsx 
+
 ## 0.2.3 - 06.04.2019
 
 ### Fixed
