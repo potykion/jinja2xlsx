@@ -46,12 +46,24 @@ assert tuple(workbook.active.values) == ((1, 2), (3, 4))
 pip install jinja2xlsx
 ```
 
+For images support:
+
+```
+pip install jinja2xlsx[pil]
+```
+
 ## Development
 
 Install dependencies:
 
 ```
 poetry install
+```
+
+For images support:
+
+```
+poetry install -E pil
 ```
 
 Run tests and linting:
