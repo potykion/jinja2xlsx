@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 - 18.10.2019
+
+- Update openpyxl to ^3.0
+
 ## 0.3.0 - 18.05.2019
 
 - jinja2xlsx.render.Renderer: parse img tag to image and add it to xlsx 
