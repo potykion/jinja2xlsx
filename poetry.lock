@@ -679,7 +679,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 pil = ["pillow"]
 
 [metadata]
-content-hash = "421212b703e43a11491922e634d4d06f002bc98e21c0eacb3b94cb5af35e6401"
+content-hash = "2b766ca9df87bc8e594f29f7dcc2d62d89a7ce19bddb0d1f39b95764387f5449"
 python-versions = "^3.7"
 
 [metadata.files]
