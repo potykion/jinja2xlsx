@@ -25,5 +25,9 @@ jobs:
         poetry_version: 1.0
         args: install -E pil
     - name: QA
-      run: |
-        poetry run pre-commit run -a
+      uses: abatilo/actions-poetry@v1.8.1
+        with:
+          python_version: ${{ matrix.python-version }}
+          poetry_version: 1.0
+          args: run pre-commit run -a
+
