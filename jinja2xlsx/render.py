@@ -37,7 +37,8 @@ class Renderer:
         for row_index, row in enumerate(self.parser.rows):
             col_index = 0
 
-            for html_cell in row.find("td"):
+            html_cells = [*row.find("th"), *row.find("td")]
+            for html_cell in html_cells:
                 target_cell, col_index = self._find_free_cell(col_index, row_index)
 
                 colspan = int(html_cell.attrs.get("colspan", 1))

@@ -70,7 +70,6 @@ def test_xlsx_table_created_from_table_has_column_width() -> None:
         # wb.save("actual_table_with_colgroup.xlsx")
 
     assert wb.active.column_dimensions["A"].width == width_pixels_to_xlsx_units(100)
-    assert wb.active.column_dimensions["B"].width == 0
     assert wb.active.column_dimensions["C"].width == width_pixels_to_xlsx_units(200)
 
 
@@ -119,3 +118,12 @@ def test_xlsx_creation_from_table_with_image() -> None:
         wb = render(html_table)
 
     assert len(wb.active._images) == 1
+
+
+def test_xlsx_creation_from_table_with_th() -> None:
+    with read_from_test_dir("table_with_th.html") as f:
+        html_table = f.read()
+        wb = render(html_table)
+
+    assert wb.active.cell(row=1, column=1).font.bold
+    assert wb.active.cell(row=1, column=1).value == "Номер заказа"

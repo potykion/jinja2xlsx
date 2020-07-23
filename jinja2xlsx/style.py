@@ -68,6 +68,7 @@ class Stylist:
     def build_style_from_html(self, html_element: Element) -> Style:
         style_attr = html_element.attrs.get("style")
         style = extract_style(style_attr)
+        style.font.bold = style.font.bold or html_element.tag == "th"
         style = self.default_style.union(style)
         return style
 
