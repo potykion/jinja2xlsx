@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install
-      uses: abatilo/actions-poetry@v1.0.0
+      uses: abatilo/actions-poetry@v1.8.1
       with:
         python_version: ${{ matrix.python-version }}
         poetry_version: 1.0
