@@ -1,7 +1,9 @@
+import pytest
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Border, Side, Font
 
 from jinja2xlsx.api import render
+from jinja2xlsx.config import Config
 from jinja2xlsx.style import Style
 from jinja2xlsx.testing_utils import read_from_test_dir, get_wb_values, get_test_file_path
 from jinja2xlsx.utils import width_pixels_to_xlsx_units, height_pixels_to_xlsx_units
@@ -115,9 +117,38 @@ def test_xlsx_creation_from_table_with_multiple_borders() -> None:
 def test_xlsx_creation_from_table_with_image() -> None:
     with read_from_test_dir("table_with_image.html") as f:
         html_table = f.read()
-        wb = render(html_table)
+        wb = render(html_table, config=Config(parse_img=True))
 
     assert len(wb.active._images) == 1
+
+
+def test_xlsx_creation_from_table_with_image_url() -> None:
+    with read_from_test_dir("table_with_image_url.html") as f:
+        html_table = f.read()
+        wb = render(html_table, config=Config(parse_img=True, parse_img_url=True))
+
+    assert len(wb.active._images) == 1
+
+
+def test_xlsx_creation_from_table_with_relative_image() -> None:
+    with read_from_test_dir("table_with_relative_image.html") as f:
+        html_table = f.read()
+        wb = render(
+            html_table,
+            config=Config(
+                parse_img=True, parse_img_url=True, base_url="https://avatars.mds.yandex.net"
+            ),
+        )
+
+    assert len(wb.active._images) == 1
+
+
+def test_xlsx_creation_from_table_with_relative_image_and_no_base_url() -> None:
+    with read_from_test_dir("table_with_relative_image.html") as f:
+        html_table = f.read()
+
+    with pytest.raises(ValueError):
+        render(html_table, config=Config(parse_img=True, parse_img_url=True))
 
 
 def test_xlsx_creation_from_table_with_th() -> None:

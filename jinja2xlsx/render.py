@@ -6,7 +6,8 @@ from openpyxl.cell import MergedCell, Cell
 from openpyxl.worksheet.worksheet import Worksheet
 
 from jinja2xlsx.adjust import Adjuster
-from jinja2xlsx.image import parse_img
+from jinja2xlsx.config import Config
+from jinja2xlsx.image import ImageParse
 from jinja2xlsx.parse import Parser
 from jinja2xlsx.style import Stylist
 from jinja2xlsx.utils import CellGenerator, create_cell_range_str, parse_cell_value
@@ -16,6 +17,7 @@ from jinja2xlsx.utils import CellGenerator, create_cell_range_str, parse_cell_va
 class Renderer:
     parser: Parser
     stylist: Stylist
+    config: Config
     workbook: Workbook = None
     sheet: Worksheet = None
 
@@ -75,8 +77,8 @@ class Renderer:
             assert target_cell
 
             image_tag = html_cell.find("img", first=True)
-            if image_tag:
-                image = parse_img(image_tag)
+            if image_tag and self.config.parse_img:
+                image = ImageParse(self.config)(image_tag)
                 self.sheet.add_image(image, target_cell.coordinate)
             else:
                 target_cell.value = parse_cell_value(html_cell.text)
