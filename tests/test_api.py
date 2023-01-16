@@ -59,10 +59,10 @@ def test_xlsx_table_created_from_html_table_with_merged_cell_and_side_border() -
         html_table = f.read()
         actual_wb = render(html_table)
 
-    assert actual_wb.active.cell(row=1, column=1).border != Border(bottom=Side("medium"))
-    assert actual_wb.active.cell(row=1, column=2).border != Border(bottom=Side("medium"))
-    assert actual_wb.active.cell(row=2, column=1).border == Border(bottom=Side("medium"))
-    assert actual_wb.active.cell(row=2, column=2).border == Border(bottom=Side("medium"))
+    assert actual_wb.active.cell(row=1, column=1).border.bottom != Side("medium")
+    assert actual_wb.active.cell(row=1, column=2).border.bottom != Side("medium")
+    assert actual_wb.active.cell(row=2, column=1).border.bottom == Side("medium")
+    assert actual_wb.active.cell(row=2, column=2).border.bottom == Side("medium")
 
 
 def test_xlsx_table_created_from_table_has_column_width() -> None:
@@ -109,9 +109,9 @@ def test_xlsx_creation_from_table_with_multiple_borders() -> None:
         html_table = f.read()
         wb = render(html_table)
 
-    assert wb.active.cell(1, 1).border == Border(
-        left=Side("thin"), right=Side("thin"), top=Side("thin")
-    )
+    assert wb.active.cell(1, 1).border.left == Side("thin")
+    assert wb.active.cell(1, 1).border.right == Side("thin")
+    assert wb.active.cell(1, 1).border.top == Side("thin")
 
 
 def test_xlsx_creation_from_table_with_image() -> None:

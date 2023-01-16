@@ -1,6 +1,7 @@
+import dataclasses
 import re
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Iterator
+from typing import Optional, Dict
 
 from openpyxl.cell import Cell
 from openpyxl.styles import Border, Side, Alignment, Font
@@ -121,6 +122,43 @@ def parse_style_attr(style_str: Optional[str]) -> Dict:
     }
 
 
+@dataclasses.dataclass
+class ParseBorder:
+    style_dict: Dict[str, str]
+
+    def __call__(self) -> Border:
+        final_border = Border()
+
+        border_style_attrs = [
+            'border',
+            'border-left',
+            'border-right',
+            'border-top',
+            'border-bottom',
+        ]
+        border_style_attrs = [attr for attr in border_style_attrs if attr in self.style_dict]
+
+        for attr in border_style_attrs:
+            if attr == 'border':
+                final_border.left = self._parse_b_value(self.style_dict[attr])
+                final_border.right = self._parse_b_value(self.style_dict[attr])
+                final_border.top = self._parse_b_value(self.style_dict[attr])
+                final_border.bottom = self._parse_b_value(self.style_dict[attr])
+            else:
+                side = attr.split('-')[1]
+                setattr(final_border, side, self._parse_b_value(self.style_dict[attr]))
+
+        return final_border
+
+    def _parse_b_value(self, b_value: str) -> Side:
+        if b_value == '1px solid black':
+            return Side('thin')
+        if re.match(r'\d+px solid black', b_value):
+            return Side('medium')
+        if b_value == '0' or b_value == 'none':
+            return Side()
+
+
 def _build_border(style_dict: Dict[str, str]) -> Border:
     """
     >>> border = _build_border({"border": "1px solid black"})
@@ -132,64 +170,17 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
     >>> border.right.style
     'medium'
     >>> border = _build_border({"border": "1px solid black", "border-bottom": "0"})
-    >>> border == Border(left=Side("thin"), right=Side("thin"), top=Side("thin"))
+    >>> border.left == border.right == border.top == Side("thin")
+    True
+    >>> border.bottom == Side()
     True
     >>> border = _build_border({"border": "1px solid black", "border-top": "none"})
-    >>> border == Border(left=Side("thin"), right=Side("thin"), bottom=Side("thin"))
+    >>> border.left == border.right == border.bottom == Side("thin")
+    True
+    >>> border.top == Side()
     True
     """
-
-    def _from_border_attr(border_attr: str) -> Optional[Border]:
-        border_rule = style_dict.get(border_attr)
-        if not border_rule:
-            return None
-
-        if border_rule == "1px solid black":
-            side = Side(style="thin")
-        elif re.match(r"\d+px solid black", border_rule):
-            side = Side(style="medium")
-        elif border_rule.startswith("0") or border_rule.startswith("none"):
-            side = REMOVE_SIDE
-        else:
-            side = Side()
-
-        if border_attr == "border":
-            return Border(left=side, right=side, top=side, bottom=side)
-        if border_attr == "border-left":
-            return Border(left=side)
-        if border_attr == "border-right":
-            return Border(right=side)
-        if border_attr == "border-top":
-            return Border(top=side)
-        if border_attr == "border-bottom":
-            return Border(bottom=side)
-
-        return None
-
-    borders: Iterator[Border] = filter(
-        None,
-        (
-            _from_border_attr("border"),
-            _from_border_attr("border-left"),
-            _from_border_attr("border-right"),
-            _from_border_attr("border-top"),
-            _from_border_attr("border-bottom"),
-        ),
-    )
-
-    final_border = Border()
-
-    sides = ("left", "right", "top", "bottom")
-
-    for border in borders:
-        for side_name in sides:
-            side = getattr(border, side_name)
-            if side == Side() and side is not REMOVE_SIDE:
-                continue
-
-            setattr(final_border, side_name, side)
-
-    return final_border
+    return ParseBorder(style_dict)()
 
 
 def _build_alignment(style_dict: Dict) -> Alignment:

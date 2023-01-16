@@ -611,6 +611,25 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "types-requests"
+version = "2.28.11.7"
+description = "Typing stubs for requests"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-urllib3 = "<1.27"
+
+[[package]]
+name = "types-urllib3"
+version = "1.26.25.4"
+description = "Typing stubs for urllib3"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.4.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -683,7 +702,7 @@ pil = ["pillow"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "372ce99818efd4303d63071f93ad347237b1f670c477459f0d504f3df077c981"
+content-hash = "6d484bf4dda429bb2feceb3344d38a9eb02b04f0707160d490817b912c02c4ab"
 
 [metadata.files]
 appdirs = []
@@ -739,6 +758,8 @@ soupsieve = []
 tomli = []
 tqdm = []
 typed-ast = []
+types-requests = []
+types-urllib3 = []
 typing-extensions = []
 urllib3 = []
 virtualenv = []
