@@ -13,5 +13,9 @@ def render(
     default_style: Optional[Style] = None,
     config: Optional[Config] = None,
 ) -> Workbook:
-    renderer = Renderer(Parser(html_str), Stylist(default_style or Style()), config or Config())
+    renderer = Renderer(
+        Parser(html_str),
+        Stylist(default_style or Style()),
+        config or Config(),
+    )
     return renderer()

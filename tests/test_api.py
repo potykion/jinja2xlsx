@@ -45,6 +45,16 @@ def test_xlsx_table_created_from_html_table_has_styles() -> None:
     assert styled_cell.font == Font(bold=True)
 
 
+def test_xlsx_table_created_from_html_table_has_complex_styles() -> None:
+    with read_from_test_dir("table_with_complex_style.html") as f:
+        html_table = f.read()
+        actual_wb = render(html_table)
+        styled_cell = actual_wb.active.cell(1, 1)
+
+    assert styled_cell.alignment == Alignment(horizontal="center", vertical='top')
+    assert styled_cell.font == Font(size=8)
+
+
 def test_xlsx_table_created_from_html_table_has_side_border() -> None:
     with read_from_test_dir("table_with_side_borders.html") as f:
         html_table = f.read()

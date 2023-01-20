@@ -5,6 +5,7 @@ from typing import Optional, Dict
 
 from openpyxl.cell import Cell
 from openpyxl.styles import Border, Side, Alignment, Font
+from openpyxl.styles.alignment import vertical_aligments
 from requests_html import Element
 
 from jinja2xlsx.utils import union_dicts, CellRange
@@ -184,9 +185,25 @@ def _build_border(style_dict: Dict[str, str]) -> Border:
 
 
 def _build_alignment(style_dict: Dict) -> Alignment:
-    word_wrap = style_dict.get("word-wrap")
+    """
+    >>> _build_alignment({'vertical-align': 'super'})
+    Traceback (most recent call last):
+    ...
+    AssertionError: vertical-align should be in ('top', 'center', 'bottom', 'justify', 'distributed'), got: super
+    """
+    h_align = style_dict.get("text-align")
+    # html-v-align: baseline | sub | super | text-top | text-bottom | middle | top | bottom | <percentage> | <length>
+    # xlsx-v-align: "top", "center", "bottom", "justify", "distributed",
+    v_align = style_dict.get('vertical-align')
+    if v_align:
+        if v_align == 'middle':
+            v_align = 'center'
+        assert v_align in vertical_aligments, \
+            f'vertical-align should be in {vertical_aligments}, got: {v_align}'
+
 
     wrap_text: Optional[bool]
+    word_wrap = style_dict.get("word-wrap")
     if word_wrap == "break-word":
         wrap_text = True
     elif word_wrap == "normal":
@@ -194,10 +211,23 @@ def _build_alignment(style_dict: Dict) -> Alignment:
     else:
         wrap_text = None
 
-    alignment = Alignment(horizontal=style_dict.get("text-align"), wrap_text=wrap_text)
+    alignment = Alignment(horizontal=h_align, vertical=v_align, wrap_text=wrap_text)
     return alignment
 
 
 def _build_font(style_dict: Dict) -> Font:
-    font = Font(bold=style_dict.get("font-weight") == "bold")
-    return font
+    """
+    >>> _build_font({'font-size': '8px'}).size == 8
+    True
+    """
+    bold = style_dict.get("font-weight") == "bold"
+
+    size: Optional[int] = None
+    size_str = style_dict.get('font-size')
+    if size_str:
+        size = int(re.findall(r'(\d+)px', size_str)[0])
+
+    return Font(
+        bold=bold,
+        size=size,
+    )
