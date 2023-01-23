@@ -117,10 +117,13 @@ def parse_style_attr(style_str: Optional[str]) -> Dict:
     if not style_str:
         return {}
 
-    return {
-        style.strip(): value.strip()
-        for style, value in (style.split(":") for style in filter(None, style_str.split(";")))
-    }
+    try:
+        return {
+            style.strip(): value.strip()
+            for style, value in (style.split(":") for style in filter(None, style_str.split(";")))
+        }
+    except ValueError:
+        raise ValueError(f'Failed to parse style: {style_str}')
 
 
 @dataclasses.dataclass
