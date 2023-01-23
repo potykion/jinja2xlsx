@@ -113,6 +113,8 @@ def parse_style_attr(style_str: Optional[str]) -> Dict:
     {}
     >>> parse_style_attr(None)
     {}
+    >>> parse_style_attr('border: 1px solid black; ')
+    {'border': '1px solid black'}
     """
     if not style_str:
         return {}
@@ -120,7 +122,7 @@ def parse_style_attr(style_str: Optional[str]) -> Dict:
     try:
         return {
             style.strip(): value.strip()
-            for style, value in (style.split(":") for style in filter(None, style_str.split(";")))
+            for style, value in (style.split(":") for style in filter(None, map(str.strip, style_str.split(";"))))
         }
     except ValueError:
         raise ValueError(f'Failed to parse style: {style_str}')
